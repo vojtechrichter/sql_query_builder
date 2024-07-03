@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -53,6 +54,12 @@ func (qb QueryBuilder) From(tableName string) QueryBuilder {
 	return qb
 }
 
+func (qb QueryBuilder) Limit(recordLimit uint32) QueryBuilder {
+	qb.query[STATEMENT_LIMIT] = strconv.Itoa(int(recordLimit))
+
+	return qb
+}
+
 func (qb QueryBuilder) StartWhere() WhereInterface {
 	wi := WhereInterface{
 		prevBuilderInstance: &qb,
@@ -75,6 +82,9 @@ func (qb QueryBuilder) GetFinal() string {
 	finalQuery.WriteString(" WHERE ")
 	finalQuery.WriteString("(" + qb.query[STATEMENT_WHERE] + ")")
 
+	finalQuery.WriteString(" LIMIT ")
+	finalQuery.WriteString(qb.query[STATEMENT_LIMIT])
+
 	finalQuery.WriteString(";")
 
 	return finalQuery.String()
@@ -82,7 +92,7 @@ func (qb QueryBuilder) GetFinal() string {
 
 func main() {
 	builder := InitQueryBuilder()
-	builder.Select("user", "email", "is_admin").From("administration").StartWhere().Equals("user", "admin").EndWhere()
+	builder.Select("user", "email", "is_admin").From("administration").StartWhere().Equals("user", "admin").EndWhere().Limit(10)
 
 	log.Println(builder.GetFinal())
 }
