@@ -60,6 +60,12 @@ func (qb QueryBuilder) Limit(recordLimit uint32) QueryBuilder {
 	return qb
 }
 
+func (qb QueryBuilder) OrderBy(col string) QueryBuilder {
+	qb.query[STATEMENT_GROUP_BY] = col
+
+	return qb
+}
+
 func (qb QueryBuilder) StartWhere() WhereInterface {
 	wi := WhereInterface{
 		prevBuilderInstance: &qb,
@@ -82,6 +88,9 @@ func (qb QueryBuilder) GetFinal() string {
 	finalQuery.WriteString(" WHERE ")
 	finalQuery.WriteString("(" + qb.query[STATEMENT_WHERE] + ")")
 
+	finalQuery.WriteString(" ORDER BY ")
+	finalQuery.WriteString(qb.query[STATEMENT_GROUP_BY])
+
 	finalQuery.WriteString(" LIMIT ")
 	finalQuery.WriteString(qb.query[STATEMENT_LIMIT])
 
@@ -92,7 +101,7 @@ func (qb QueryBuilder) GetFinal() string {
 
 func main() {
 	builder := InitQueryBuilder()
-	builder.Select("user", "email", "is_admin").From("administration").StartWhere().Equals("user", "admin").EndWhere().Limit(10)
+	builder.Select("user", "email", "is_admin").From("administration").StartWhere().Equals("user", "admin").EndWhere().OrderBy("createstamp").Limit(10)
 
 	log.Println(builder.GetFinal())
 }
